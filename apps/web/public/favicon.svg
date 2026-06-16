@@ -1,0 +1,7 @@
+<svg width="64" height="64" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" rx="26" fill="#1B5E20"/>
+  <!-- Gota de combustível -->
+  <path d="M60 24c8 12 16 19 16 30a16 16 0 11-32 0c0-11 8-18 16-30z" fill="#FFD600"/>
+  <text x="60" y="70" font-family="Sora, sans-serif" font-size="26" font-weight="800"
+        fill="#1B5E20" text-anchor="middle">A</text>
+</svg>
