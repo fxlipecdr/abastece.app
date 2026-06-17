@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Abastece",
+    "slug": "abastece",
+    "scheme": "abastece",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#1B5E20"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.abastece",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "O Abastece usa sua localização para mostrar os postos mais próximos e seus preços."
+      }
+    },
+    "android": {
+      "package": "app.abastece",
+      "adaptiveIcon": {
+        "backgroundColor": "#1B5E20"
+      },
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Abastece usa sua localização para mostrar os postos mais próximos."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

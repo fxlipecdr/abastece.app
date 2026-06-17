@@ -19,6 +19,8 @@ import { supabase } from '../../services/supabase';
 import { PriceTag } from '../../components/PriceTag';
 import { PriceHistoryChart, type PricePoint } from '../../components/PriceHistoryChart';
 import { OfflineBanner } from '../../components/OfflineBanner';
+import { useFavorites } from '../../hooks/useFavorites';
+import { useAuthStore } from '../../stores/auth';
 
 interface StationPrice {
   fuel_type: FuelType;
@@ -65,6 +67,8 @@ async function fetchHistory(id: string, fuel: FuelType): Promise<PricePoint[]> {
 export function StationDetailPage() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
+  const { session } = useAuthStore();
+  const { data: favorites = [], add, remove } = useFavorites();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['station', id],
@@ -85,6 +89,8 @@ export function StationDetailPage() {
     return computePriceThresholds(list);
   }, [data]);
 
+  const isFavorite = favorites.some((f) => f.station_id === id);
+
   if (isLoading) return <p className="p-6 text-center text-text-muted">Carregando posto…</p>;
   if (isError || !data) return <p className="p-6 text-center text-danger">Posto não encontrado.</p>;
 
@@ -94,6 +100,15 @@ export function StationDetailPage() {
   // Link de navegação universal (abre app de mapas padrão do dispositivo).
   const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`;
 
+  function toggleFavorite() {
+    if (!session) {
+      navigate('/auth/login');
+      return;
+    }
+    if (isFavorite) remove.mutate(id);
+    else add.mutate(id);
+  }
+
   return (
     <div className="min-h-dvh bg-surface pb-8">
       <OfflineBanner />
@@ -102,14 +117,30 @@ export function StationDetailPage() {
         <button onClick={() => navigate(-1)} className="mb-3 text-sm text-white/80" aria-label="Voltar">
           ← Voltar
         </button>
-        <div className="flex items-center gap-2">
-          <h1 className="font-display text-2xl font-extrabold">{station.name}</h1>
-          {station.is_verified && <span aria-label="Posto verificado">✅</span>}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <h1 className="font-display text-2xl font-extrabold">{station.name}</h1>
+            {station.is_verified && <span aria-label="Posto verificado">✅</span>}
+          </div>
+          <button
+            onClick={toggleFavorite}
+            aria-pressed={isFavorite}
+            aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+            className="text-2xl"
+            disabled={add.isPending || remove.isPending}
+          >
+            {isFavorite ? '★' : '☆'}
+          </button>
         </div>
         <p className="text-white/85">
           {station.brand ? `${station.brand} • ` : ''}
           {station.address}, {station.city}/{station.state}
         </p>
+        {add.isError && (
+          <p className="mt-2 rounded-md bg-white/15 p-2 text-sm">
+            {add.error instanceof Error ? add.error.message : 'Não foi possível favoritar.'}
+          </p>
+        )}
         <a
           href={navUrl}
           target="_blank"

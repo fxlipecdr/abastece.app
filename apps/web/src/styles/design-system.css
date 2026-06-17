@@ -75,10 +75,26 @@
   color-scheme: light;
 }
 
-/* ---- Dark mode: redefine as superfícies e textos ------------------------ */
-:root[data-theme='dark'],
+/* ---- Dark mode ---------------------------------------------------------- */
+/* Variáveis de tema escuro reutilizadas pelos dois gatilhos abaixo. */
+:root[data-theme='dark'] {
+  --color-surface:        #0A1F0C;
+  --color-surface-card:   #122E15;
+  --color-text-primary:   #F1F5F0;
+  --color-text-secondary: #A7C0AA;
+  --color-text-muted:     #6E866F;
+  --color-border:         #1F3D22;
+  --color-primary-light:  #43A047;
+
+  --shadow-card:  0 2px 12px rgba(0, 0, 0, 0.35);
+  --shadow-float: 0 8px 32px rgba(0, 0, 0, 0.45);
+
+  color-scheme: dark;
+}
+
+/* Preferência do sistema, exceto quando o usuário força o tema claro. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
+  :root:not([data-theme='light']):not([data-theme='dark']) {
     --color-surface:        #0A1F0C;
     --color-surface-card:   #122E15;
     --color-text-primary:   #F1F5F0;

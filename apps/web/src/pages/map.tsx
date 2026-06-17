@@ -48,7 +48,7 @@ export function MapPage() {
   };
 
   return (
-    <div className="relative flex h-dvh flex-col">
+    <div className="relative flex h-full flex-col">
       <OfflineBanner />
 
       {/* Seletor de combustível + raio (topo) */}

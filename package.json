@@ -1,0 +1,14 @@
+{
+  "name": "abastece",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Abastece — mapeamento colaborativo de preços de combustíveis no Brasil.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "web": "npm run dev --workspace @abastece/web",
+    "mobile": "npm run start --workspace @abastece/mobile"
+  }
+}
