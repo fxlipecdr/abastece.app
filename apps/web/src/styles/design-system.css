@@ -1,34 +1,46 @@
 /* =============================================================================
-   Abastece.app — Design System (CSS custom properties)
+   Abastece.app — Design System v3 (clean & premium)
    -----------------------------------------------------------------------------
-   Fonte única das cores, tipografia, raios e sombras. Importado no topo da app
-   antes do Tailwind. Mobile-first. Inclui suporte completo a dark mode.
+   Estética minimalista: muito ar, sombras suaves e neutras, verde como sotaque.
+   Gradientes usados com parcimônia. Mobile-first. Dark mode. Contraste AA.
    ============================================================================= */
 
-/* Fontes do Google — Sora (display), Inter (UI), JetBrains Mono (preços). */
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700;800&display=swap');
 
 :root {
-  /* ---- Paleta (valores exatos do escopo, Seção 2) ----------------------- */
-  --color-primary:        #1B5E20;
-  --color-primary-light:  #2E7D32;
-  --color-primary-bright: #43A047;
-  --color-accent:         #FFD600;
-  --color-accent-warm:    #FF8F00;
-  --color-danger:         #C62828;
-  --color-surface:        #F9FBF7;
-  --color-surface-card:   #FFFFFF;
-  --color-text-primary:   #1A1A1A;
-  --color-text-secondary: #546E57;
-  --color-text-muted:     #90A593;
-  --color-border:         #E0EAE0;
-  --color-dark:           #0A1F0C;
+  /* ---- Marca ------------------------------------------------------------ */
+  --color-primary:        #0E8C43;
+  --color-primary-light:  #16A34A;
+  --color-primary-bright: #22C55E;
+  --color-primary-deep:   #07572A;
 
-  /* ---- Semáforo de preços (assinatura visual) --------------------------- */
-  --price-cheap:     var(--color-primary);   /* 🟢 top 25% mais barato       */
-  --price-mid:       var(--color-accent);     /* 🟡 faixa média 25%–75%       */
-  --price-expensive: var(--color-danger);     /* 🔴 top 25% mais caro         */
-  --price-unknown:   var(--color-text-muted); /* sem dados recentes           */
+  --color-accent:         #FFC400;
+  --color-accent-warm:    #FF8F00;
+  --color-danger:         #E11D48;
+
+  /* ---- Superfícies (mais claras e limpas) ------------------------------- */
+  --color-surface:        #F7FAF8;
+  --color-surface-card:   #FFFFFF;
+  --color-surface-alt:    #F0F5F1;
+  --color-text-primary:   #0C1F14;
+  --color-text-secondary: #4A6553;
+  --color-text-muted:     #93A89A;
+  --color-border:         #EAF1EC;
+  --color-dark:           #07140C;
+
+  /* ---- Gradientes (sotaque) --------------------------------------------- */
+  --gradient-brand:  linear-gradient(135deg, #0E8C43 0%, #22C55E 100%);
+  --gradient-hero:   linear-gradient(155deg, #0B7A3B 0%, #16A34A 55%, #2BC15A 100%);
+  --gradient-accent: linear-gradient(135deg, #FFD60A 0%, #FF9500 100%);
+  --gradient-cheap:  linear-gradient(135deg, #16A34A 0%, #22C55E 100%);
+  --gradient-mid:    linear-gradient(135deg, #FFC400 0%, #FF8F00 100%);
+  --gradient-exp:    linear-gradient(135deg, #F43F5E 0%, #E11D48 100%);
+
+  /* ---- Semáforo --------------------------------------------------------- */
+  --price-cheap:     #15A04A;
+  --price-mid:       #E08600;
+  --price-expensive: #E11D48;
+  --price-unknown:   #93A89A;
 
   /* ---- Tipografia ------------------------------------------------------- */
   --font-display: 'Sora', system-ui, sans-serif;
@@ -41,19 +53,25 @@
   --text-lg:   1.125rem;
   --text-xl:   1.25rem;
   --text-2xl:  1.5rem;
-  --text-3xl:  2rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.5rem;
 
   /* ---- Raios ------------------------------------------------------------ */
-  --radius-sm:   8px;
+  --radius-sm:   10px;
   --radius-md:   16px;
-  --radius-lg:   24px;
+  --radius-lg:   22px;
+  --radius-xl:   28px;
   --radius-pill: 999px;
 
-  /* ---- Sombras ---------------------------------------------------------- */
-  --shadow-card:  0 2px 12px rgba(27, 94, 32, 0.08);
-  --shadow-float: 0 8px 32px rgba(27, 94, 32, 0.16);
+  /* ---- Sombras (suaves, neutras) ---------------------------------------- */
+  --shadow-xs:    0 1px 2px rgba(12, 31, 20, 0.05);
+  --shadow-card:  0 1px 3px rgba(12, 31, 20, 0.06), 0 1px 2px rgba(12, 31, 20, 0.04);
+  --shadow-soft:  0 4px 16px rgba(12, 31, 20, 0.07);
+  --shadow-float: 0 10px 34px rgba(12, 31, 20, 0.12);
+  --shadow-sheet: 0 -6px 28px rgba(12, 31, 20, 0.09);
+  --glow-primary: 0 6px 18px rgba(14, 140, 67, 0.30);
 
-  /* ---- Espaçamento base ------------------------------------------------- */
+  /* ---- Espaçamento ------------------------------------------------------ */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -61,66 +79,60 @@
   --space-6: 1.5rem;
   --space-8: 2rem;
 
-  /* ---- Camadas (z-index) ------------------------------------------------ */
-  --z-map:      0;
-  --z-sheet:    20;
-  --z-banner:   30;
-  --z-fab:      40;
-  --z-modal:    50;
-  --z-toast:    60;
+  /* ---- Camadas ---------------------------------------------------------- */
+  --z-map:    0;
+  --z-sheet:  20;
+  --z-header: 25;
+  --z-banner: 30;
+  --z-fab:    40;
+  --z-modal:  50;
+  --z-toast:  60;
 
-  /* ---- Alturas de toque (acessibilidade: min 44x44) --------------------- */
   --touch-min: 44px;
-
   color-scheme: light;
 }
 
-/* ---- Dark mode ---------------------------------------------------------- */
-/* Variáveis de tema escuro reutilizadas pelos dois gatilhos abaixo. */
+/* ---- Dark mode --------------------------------------------------------- */
 :root[data-theme='dark'] {
-  --color-surface:        #0A1F0C;
-  --color-surface-card:   #122E15;
-  --color-text-primary:   #F1F5F0;
-  --color-text-secondary: #A7C0AA;
-  --color-text-muted:     #6E866F;
-  --color-border:         #1F3D22;
-  --color-primary-light:  #43A047;
+  --color-surface:        #07140C;
+  --color-surface-card:   #0F261A;
+  --color-surface-alt:    #14301F;
+  --color-text-primary:   #ECFDF2;
+  --color-text-secondary: #9DCBAC;
+  --color-text-muted:     #5E8068;
+  --color-border:         #1B3D27;
+  --color-primary-light:  #22C55E;
 
-  --shadow-card:  0 2px 12px rgba(0, 0, 0, 0.35);
-  --shadow-float: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --shadow-xs:    0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card:  0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-soft:  0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-float: 0 10px 34px rgba(0, 0, 0, 0.5);
+  --shadow-sheet: 0 -6px 28px rgba(0, 0, 0, 0.45);
 
   color-scheme: dark;
 }
 
-/* Preferência do sistema, exceto quando o usuário força o tema claro. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']):not([data-theme='dark']) {
-    --color-surface:        #0A1F0C;
-    --color-surface-card:   #122E15;
-    --color-text-primary:   #F1F5F0;
-    --color-text-secondary: #A7C0AA;
-    --color-text-muted:     #6E866F;
-    --color-border:         #1F3D22;
-    --color-primary-light:  #43A047;
-
-    --shadow-card:  0 2px 12px rgba(0, 0, 0, 0.35);
-    --shadow-float: 0 8px 32px rgba(0, 0, 0, 0.45);
-
+    --color-surface:        #07140C;
+    --color-surface-card:   #0F261A;
+    --color-surface-alt:    #14301F;
+    --color-text-primary:   #ECFDF2;
+    --color-text-secondary: #9DCBAC;
+    --color-text-muted:     #5E8068;
+    --color-border:         #1B3D27;
+    --color-primary-light:  #22C55E;
+    --shadow-card:  0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-soft:  0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-float: 0 10px 34px rgba(0, 0, 0, 0.5);
+    --shadow-sheet: 0 -6px 28px rgba(0, 0, 0, 0.45);
     color-scheme: dark;
   }
 }
 
-/* ---- Reset enxuto e base mobile-first ----------------------------------- */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  -webkit-text-size-adjust: 100%; /* respeita dynamic type do sistema */
-  text-size-adjust: 100%;
-}
+/* ---- Reset + base ------------------------------------------------------ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 body {
   font-family: var(--font-body);
@@ -135,27 +147,47 @@ body {
 h1, h2, h3, h4 {
   font-family: var(--font-display);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   color: var(--color-text-primary);
 }
 
-/* Valores monetários sempre em fonte mono para alinhamento. */
 .price-value {
   font-family: var(--font-mono);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
 }
 
-/* ---- Classes utilitárias do semáforo ------------------------------------ */
+/* ---- Utilitários ------------------------------------------------------- */
+.bg-gradient-brand { background-image: var(--gradient-brand); }
+.bg-gradient-hero  { background-image: var(--gradient-hero); }
+.bg-gradient-accent{ background-image: var(--gradient-accent); }
+
+.text-gradient-brand {
+  background-image: var(--gradient-hero);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+}
+:root[data-theme='dark'] .glass { background: rgba(15, 38, 26, 0.78); }
+
+/* ---- Semáforo ---------------------------------------------------------- */
 .price--cheap     { color: var(--price-cheap); }
-.price--mid       { color: #A07800; }            /* amarelo escurecido p/ contraste AA sobre branco */
+.price--mid       { color: var(--price-mid); }
 .price--expensive { color: var(--price-expensive); }
 .price--unknown   { color: var(--price-unknown); }
 
 .price-dot {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: var(--radius-pill);
   flex-shrink: 0;
 }
@@ -164,39 +196,46 @@ h1, h2, h3, h4 {
 .price-dot--expensive { background: var(--price-expensive); }
 .price-dot--unknown   { background: var(--price-unknown); }
 
-/* ---- Alvos de toque acessíveis ------------------------------------------ */
-button,
-[role='button'],
-a.btn {
-  min-height: var(--touch-min);
-  min-width: var(--touch-min);
-  cursor: pointer;
-}
+/* ---- Toque + foco ------------------------------------------------------ */
+button, [role='button'], a.btn { min-height: var(--touch-min); cursor: pointer; }
+:focus-visible { outline: 2px solid var(--color-primary-bright); outline-offset: 2px; }
 
-/* Foco visível para navegação por teclado (acessibilidade). */
-:focus-visible {
-  outline: 3px solid var(--color-primary-bright);
-  outline-offset: 2px;
-}
-
-/* Respeita usuários que preferem menos movimento. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
 }
 
-/* ---- Animações reutilizáveis -------------------------------------------- */
+/* ---- Animações (discretas) --------------------------------------------- */
 @keyframes xp-pop {
-  0%   { transform: translateY(12px) scale(0.9); opacity: 0; }
-  60%  { transform: translateY(-4px) scale(1.05); opacity: 1; }
+  0%   { transform: translateY(14px) scale(0.92); opacity: 0; }
+  60%  { transform: translateY(-4px) scale(1.04); opacity: 1; }
   100% { transform: translateY(0) scale(1); opacity: 1; }
 }
-
 @keyframes fade-slide-up {
-  from { transform: translateY(16px); opacity: 0; }
+  from { transform: translateY(12px); opacity: 0; }
   to   { transform: translateY(0); opacity: 1; }
 }
+@keyframes float-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.animate-float-bob { animation: float-bob 4s ease-in-out infinite; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--color-surface-alt) 25%, #ffffff 37%, var(--color-surface-alt) 63%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: var(--radius-md);
+}
+
+/* Tints suaves (substituem modificadores de opacidade sobre var()). */
+.tint-danger  { background-color: rgba(225, 29, 72, 0.09); }
+.tint-accent  { background-color: rgba(255, 196, 0, 0.16); }
+.tint-primary { background-color: rgba(14, 140, 67, 0.10); }

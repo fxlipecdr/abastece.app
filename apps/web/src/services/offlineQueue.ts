@@ -70,7 +70,7 @@ async function dispatch(item: OfflineQueueItem): Promise<void> {
   switch (item.action) {
     case 'report_price': {
       const { error } = await supabase.functions.invoke('validate-price-report', {
-        body: item.payload,
+        body: item.payload as Record<string, unknown>,
       });
       if (error) throw error;
       break;

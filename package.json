@@ -9,6 +9,8 @@
   ],
   "scripts": {
     "web": "npm run dev --workspace @abastece/web",
-    "mobile": "npm run start --workspace @abastece/mobile"
+    "mobile": "npm run start --workspace @abastece/mobile",
+    "pull": "git pull --rebase origin main",
+    "sync": "powershell -ExecutionPolicy Bypass -File scripts/sync.ps1"
   }
 }

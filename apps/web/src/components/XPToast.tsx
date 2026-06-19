@@ -1,5 +1,5 @@
 /**
- * XPToast — animação de celebração ao ganhar XP.
+ * XPToast — celebração ao ganhar XP, com gradiente e mascote.
  * Auto-dispensa após alguns segundos. Respeita prefers-reduced-motion via CSS.
  */
 import { useEffect } from 'react';
@@ -25,11 +25,15 @@ export function XPToast({ amount, reason, onDismiss, durationMs = 3500 }: XPToas
       style={{ zIndex: 'var(--z-toast)' as unknown as number }}
       className="fixed left-1/2 top-6 -translate-x-1/2 animate-xp-pop"
     >
-      <div className="flex items-center gap-3 rounded-pill bg-primary px-5 py-3 shadow-float">
-        <Litro size={36} mood="cheer" />
+      <div className="flex items-center gap-3 rounded-pill bg-gradient-hero px-5 py-3 shadow-glow-primary">
+        <div className="flex h-10 w-10 items-center justify-center rounded-pill bg-white/20">
+          <Litro size={34} mood="cheer" />
+        </div>
         <div className="flex flex-col">
-          <span className="price-value text-lg font-bold text-accent">+{amount} XP</span>
-          <span className="text-sm font-medium text-white">{reason}</span>
+          {amount > 0 && (
+            <span className="price-value text-xl font-black text-accent">+{amount} XP</span>
+          )}
+          <span className="text-sm font-semibold text-white">{reason}</span>
         </div>
       </div>
     </div>

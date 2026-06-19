@@ -85,7 +85,7 @@ export function ReportPage() {
       <h1 className="mb-4 font-display text-xl font-extrabold">Reportar preço</h1>
 
       {error && (
-        <p className="mb-4 rounded-md bg-danger/10 p-3 text-sm text-danger" role="alert">
+        <p className="mb-4 rounded-md tint-danger p-3 text-sm text-danger" role="alert">
           {error}
         </p>
       )}

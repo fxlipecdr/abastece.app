@@ -1,14 +1,15 @@
 /**
- * BottomNav — navegação inferior persistente do app (mapa, busca, alertas, perfil).
- * Esconde-se em rotas de tela cheia (onboarding, auth).
+ * BottomNav — navegação inferior clean com ícones de linha.
+ * Item ativo: cor primária + ponto indicador. Esconde-se em telas cheias.
  */
 import { NavLink, useLocation } from 'react-router-dom';
+import { BellIcon, MapIcon, SearchIcon, UserIcon } from './icons';
 
 const ITEMS = [
-  { to: '/map', label: 'Mapa', icon: '🗺️' },
-  { to: '/search', label: 'Buscar', icon: '🔍' },
-  { to: '/alerts', label: 'Alertas', icon: '🔔' },
-  { to: '/profile', label: 'Perfil', icon: '👤' },
+  { to: '/map', label: 'Mapa', Icon: MapIcon },
+  { to: '/search', label: 'Buscar', Icon: SearchIcon },
+  { to: '/alerts', label: 'Alertas', Icon: BellIcon },
+  { to: '/profile', label: 'Perfil', Icon: UserIcon },
 ];
 
 const HIDDEN_PREFIXES = ['/onboarding', '/auth', '/offline'];
@@ -20,22 +21,29 @@ export function BottomNav() {
   return (
     <nav
       style={{ zIndex: 'var(--z-banner)' as unknown as number }}
-      className="sticky bottom-0 flex items-stretch border-t border-border bg-surface-card"
+      className="glass sticky bottom-0 flex items-stretch border-t border-border px-2 pb-[env(safe-area-inset-bottom)]"
       aria-label="Navegação principal"
     >
-      {ITEMS.map((item) => (
+      {ITEMS.map(({ to, label, Icon }) => (
         <NavLink
-          key={item.to}
-          to={item.to}
+          key={to}
+          to={to}
           className={({ isActive }) =>
             [
-              'flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-semibold',
+              'relative flex flex-1 flex-col items-center gap-1 pb-2 pt-2.5 text-[11px] font-semibold transition-colors',
               isActive ? 'text-primary' : 'text-text-muted',
             ].join(' ')
           }
         >
-          <span className="text-lg" aria-hidden="true">{item.icon}</span>
-          {item.label}
+          {({ isActive }) => (
+            <>
+              <Icon size={22} strokeWidth={isActive ? 2.4 : 2} />
+              <span>{label}</span>
+              {isActive && (
+                <span className="absolute top-0 h-0.5 w-8 rounded-pill bg-primary" aria-hidden="true" />
+              )}
+            </>
+          )}
         </NavLink>
       ))}
     </nav>

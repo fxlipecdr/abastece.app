@@ -1,35 +1,32 @@
 /**
- * Abastece.app — Edge Function: validate-price-report
+ * Abastece.app — Edge Function: validate-price-report (v2, hardened)
  * -----------------------------------------------------------------------------
- * Executada ANTES de persistir um reporte de preço. Aplica as regras
- * anti-fraude da Seção 5.3/8.3:
+ * Valida e persiste um reporte de preço, agora sob a camada de governança:
+ *   - withGovernance: CORS, request-id, payload guard, erros padronizados
+ *   - getAuthedUser:  exige JWT válido
+ *   - enforceRateLimit: cota de borda por IP+usuário (anti-abuso/DoS)
+ *   - sanitização estrita de inputs (assertUuid / assertNumber)
+ *   - set_audit_context: registra origem (IP/UA/request-id) no audit_log
  *
- *   1. GPS check  — usuário precisa estar a < 500m do posto.
- *   2. Range      — preço com desvio > 30% da média histórica vira "pendente".
- *   3. Rate limit — máximo 3 reports por posto por usuário por dia.
- *   4. Reputação  — reports de usuários nível 1 entram como pendentes.
- *   5. Persiste   — auto-aprovado insere direto; pendente aguarda 2 confirmações.
+ * Regras de negócio (mantidas):
+ *   1. GPS check (< 500m)  2. rate limit 3/posto/dia  3. range ±30%
+ *   4. reputação (nível 1 → pendente)  5. persistência + refresh da view
  *
  * Runtime: Deno (Supabase Edge Functions).
- * Deploy:  supabase functions deploy validate-price-report
  */
 
 // @ts-expect-error — resolvido pelo runtime Deno do Supabase.
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
-// @ts-expect-error — resolvido pelo runtime Deno do Supabase.
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import {
+  assertNumber,
+  assertUuid,
+  enforceRateLimit,
+  getAuthedUser,
+  HttpError,
+  json,
+  withGovernance,
+} from '../_shared/middleware.ts';
 
-// Acesso ao ambiente Deno sem depender dos tipos globais.
-const env = (key: string): string =>
-  // @ts-expect-error — Deno.env existe no runtime de execução.
-  (globalThis.Deno?.env?.get(key) as string | undefined) ?? '';
-
-const SUPABASE_URL = env('SUPABASE_URL');
-const SERVICE_ROLE_KEY = env('SUPABASE_SERVICE_ROLE_KEY');
-
-// -----------------------------------------------------------------------------
-// Tipos do payload (espelham packages/types)
-// -----------------------------------------------------------------------------
 type FuelType =
   | 'gasolina_comum'
   | 'gasolina_aditivada'
@@ -38,86 +35,75 @@ type FuelType =
   | 'diesel_s10'
   | 'gnv';
 
-interface ReportInput {
-  station_id: string;
-  fuel_type: FuelType;
-  price: number;
-  /** Localização do usuário no momento do reporte (para o GPS check). */
-  user_lat: number;
-  user_lng: number;
-}
-
-interface ValidationResult {
-  accepted: boolean;
-  pending: boolean;
-  reason?: string;
-  report_id?: string;
-}
+const FUELS: FuelType[] = [
+  'gasolina_comum',
+  'gasolina_aditivada',
+  'etanol',
+  'diesel',
+  'diesel_s10',
+  'gnv',
+];
 
 // Constantes de regra de negócio.
 const MAX_DISTANCE_METERS = 500;
 const MAX_REPORTS_PER_DAY = 3;
-const PRICE_TOLERANCE = 0.3; // ±30%
+const PRICE_TOLERANCE = 0.3;
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+// Rate limit de borda (defesa contra abuso, além da regra de negócio).
+const EDGE_RATE_LIMIT = 20; // requisições
+const EDGE_RATE_WINDOW = 60; // por minuto
 
-function json(body: ValidationResult | { error: string }, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
-}
+// Limite de tamanho do corpo (anti-DoS de payload).
+const MAX_BODY_BYTES = 2_048;
 
-serve(async (req: Request): Promise<Response> => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (req.method !== 'POST') return json({ error: 'Método não permitido' }, 405);
+serve((req: Request) =>
+  withGovernance(req, async (ctx) => {
+    if (req.method !== 'POST') {
+      throw new HttpError(405, 'Método não permitido', 'method_not_allowed');
+    }
 
-  // O JWT do usuário vem no header Authorization; usamos para identificar o autor.
-  const authHeader = req.headers.get('Authorization') ?? '';
-  const token = authHeader.replace('Bearer ', '');
-  if (!token) return json({ error: 'Não autenticado' }, 401);
+    // 0. Guard de tamanho do payload.
+    const raw = await req.text();
+    if (raw.length > MAX_BODY_BYTES) {
+      throw new HttpError(413, 'Payload muito grande', 'payload_too_large');
+    }
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      throw new HttpError(400, 'JSON inválido', 'invalid_json');
+    }
 
-  let input: ReportInput;
-  try {
-    input = (await req.json()) as ReportInput;
-  } catch {
-    return json({ error: 'Payload inválido' }, 400);
-  }
+    // 1. Autenticação.
+    const { user } = await getAuthedUser(ctx.admin, req);
+    const userId = user.id;
 
-  // Validação básica de formato antes de tocar no banco.
-  if (
-    !input.station_id ||
-    !input.fuel_type ||
-    typeof input.price !== 'number' ||
-    input.price <= 0 ||
-    input.price >= 20
-  ) {
-    return json({ error: 'Dados do reporte inválidos' }, 400);
-  }
+    // 2. Rate limit de borda (por IP + usuário).
+    await enforceRateLimit(
+      ctx.admin,
+      `report:ip:${ctx.ip}:user:${userId}`,
+      EDGE_RATE_LIMIT,
+      EDGE_RATE_WINDOW,
+    );
 
-  // Cliente com service role para escrever, mas o user_id vem do token.
-  const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-  const {
-    data: { user },
-    error: authError,
-  } = await admin.auth.getUser(token);
+    // 3. Sanitização estrita.
+    const stationId = assertUuid(parsed.station_id, 'station_id');
+    const fuelType = parsed.fuel_type as FuelType;
+    if (!FUELS.includes(fuelType)) {
+      throw new HttpError(400, 'Combustível inválido', 'invalid_input');
+    }
+    const price = assertNumber(parsed.price, 'price', { min: 0.001, max: 19.999 });
+    const userLat = assertNumber(parsed.user_lat, 'user_lat', { min: -90, max: 90 });
+    const userLng = assertNumber(parsed.user_lng, 'user_lng', { min: -180, max: 180 });
 
-  if (authError || !user) return json({ error: 'Sessão inválida' }, 401);
-  const userId = user.id;
-
-  try {
-    // ---- 1. GPS check: distância usuário ↔ posto ---------------------------
-    const { data: distRows, error: distErr } = await admin.rpc('station_distance_m', {
-      station: input.station_id,
-      user_lat: input.user_lat,
-      user_lng: input.user_lng,
+    // 4. GPS check.
+    const { data: distData, error: distErr } = await ctx.admin.rpc('station_distance_m', {
+      station: stationId,
+      user_lat: userLat,
+      user_lng: userLng,
     });
-    if (distErr) throw distErr;
-    const distanceM = Number(distRows);
+    if (distErr) throw new HttpError(500, 'Falha ao validar localização', 'distance_error');
+    const distanceM = Number(distData);
     if (!Number.isFinite(distanceM)) {
       return json({ accepted: false, pending: false, reason: 'Posto não encontrado' }, 404);
     }
@@ -129,15 +115,15 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    // ---- 3. Rate limit: reports do usuário nas últimas 24h -----------------
+    // 6. Rate limit de negócio: 3/posto/dia.
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const { count: todayCount, error: countErr } = await admin
+    const { count: todayCount, error: countErr } = await ctx.admin
       .from('price_reports')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
-      .eq('station_id', input.station_id)
+      .eq('station_id', stationId)
       .gte('reported_at', since);
-    if (countErr) throw countErr;
+    if (countErr) throw new HttpError(500, 'Falha ao verificar histórico', 'count_error');
     if ((todayCount ?? 0) >= MAX_REPORTS_PER_DAY) {
       return json({
         accepted: false,
@@ -146,68 +132,56 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    // ---- 2. Range histórico: média dos últimos 30 dias ---------------------
+    // 7. Range histórico (30 dias).
     const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: history, error: histErr } = await admin
+    const { data: history, error: histErr } = await ctx.admin
       .from('price_reports')
       .select('price')
-      .eq('station_id', input.station_id)
-      .eq('fuel_type', input.fuel_type)
+      .eq('station_id', stationId)
+      .eq('fuel_type', fuelType)
       .gte('reported_at', monthAgo);
-    if (histErr) throw histErr;
+    if (histErr) throw new HttpError(500, 'Falha ao consultar histórico', 'history_error');
 
     const prices = (history ?? []).map((r: { price: number }) => Number(r.price));
-    const avg = prices.length
-      ? prices.reduce((a, b) => a + b, 0) / prices.length
-      : null;
+    const avg = prices.length ? prices.reduce((a, b) => a + b, 0) / prices.length : null;
     const outOfRange =
-      avg !== null &&
-      (input.price < avg * (1 - PRICE_TOLERANCE) ||
-        input.price > avg * (1 + PRICE_TOLERANCE));
+      avg !== null && (price < avg * (1 - PRICE_TOLERANCE) || price > avg * (1 + PRICE_TOLERANCE));
 
-    // ---- 4. Reputação: nível 1 entra pendente ------------------------------
-    const { data: profile, error: profErr } = await admin
+    // 8. Reputação.
+    const { data: profile, error: profErr } = await ctx.admin
       .from('profiles')
       .select('level')
       .eq('id', userId)
       .single();
-    if (profErr) throw profErr;
+    if (profErr) throw new HttpError(500, 'Falha ao carregar perfil', 'profile_error');
     const lowReputation = (profile?.level ?? 1) <= 1;
 
     const pending = outOfRange || lowReputation;
 
-    // ---- 5. Persistência ---------------------------------------------------
-    const { data: inserted, error: insErr } = await admin
-      .from('price_reports')
-      .insert({
-        station_id: input.station_id,
-        user_id: userId,
-        fuel_type: input.fuel_type,
-        price: input.price,
-        is_pending: pending,
-        source: 'user',
-      })
-      .select('id')
-      .single();
-    if (insErr) throw insErr;
+    // 9. Persistência auditada (contexto de origem + insert na mesma transação).
+    const { data: newId, error: insErr } = await ctx.admin.rpc('insert_price_report_audited', {
+      p_station: stationId,
+      p_user: userId,
+      p_fuel: fuelType,
+      p_price: price,
+      p_pending: pending,
+      p_ip: ctx.ip,
+      p_user_agent: ctx.userAgent,
+      p_request_id: ctx.requestId,
+    });
+    if (insErr) throw new HttpError(500, 'Falha ao salvar o reporte', 'insert_error');
 
-    // Auto-aprovado atualiza a view materializada para refletir na hora.
     if (!pending) {
-      await admin.rpc('refresh_current_prices').catch(() => {
-        /* refresh é best-effort; o cron cobre o caso de falha. */
-      });
+      await ctx.admin.rpc('refresh_current_prices').catch(() => {});
     }
 
     return json({
       accepted: true,
       pending,
-      report_id: inserted.id,
+      report_id: newId,
       reason: pending
         ? 'Reporte recebido! Aguardando confirmação de outros usuários.'
         : 'Reporte confirmado. Obrigado!',
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erro interno';
-    return json({ error: message }, 500);
-  }
-});
+  })
+);

@@ -208,3 +208,64 @@ export const XP_REWARDS = {
   newStation: 100,
   completeProfile: 50,
 } as const;
+
+// -----------------------------------------------------------------------------
+// Multi-tenancy + RBAC (B2B) — espelha supabase/migrations/003
+// -----------------------------------------------------------------------------
+
+/** Papéis dentro de um tenant, do menos para o mais privilegiado. */
+export type TenantRole = 'viewer' | 'analyst' | 'manager' | 'admin' | 'owner';
+
+/** Ordem de privilégio para checagens hierárquicas (maior = mais poder). */
+export const TENANT_ROLE_RANK: Record<TenantRole, number> = {
+  viewer: 0,
+  analyst: 1,
+  manager: 2,
+  admin: 3,
+  owner: 4,
+};
+
+/** Retorna true se `role` tem privilégio >= `required`. */
+export function roleAtLeast(role: TenantRole, required: TenantRole): boolean {
+  return TENANT_ROLE_RANK[role] >= TENANT_ROLE_RANK[required];
+}
+
+export type TenantStatus = 'trial' | 'active' | 'suspended' | 'canceled';
+export type TenantPlan = 'visible' | 'featured' | 'premium' | 'enterprise';
+
+export interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  cnpj: string | null;
+  plan: TenantPlan;
+  status: TenantStatus;
+  settings: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TenantMember {
+  tenant_id: string;
+  user_id: string;
+  role: TenantRole;
+  invited_by: string | null;
+  created_at: string;
+}
+
+/** Registro imutável da trilha de auditoria. */
+export interface AuditLogEntry {
+  id: number;
+  occurred_at: string;
+  actor_id: string | null;
+  actor_role: string | null;
+  tenant_id: string | null;
+  action: 'INSERT' | 'UPDATE' | 'DELETE';
+  entity_type: string;
+  entity_id: string | null;
+  old_data: Record<string, unknown> | null;
+  new_data: Record<string, unknown> | null;
+  ip: string | null;
+  user_agent: string | null;
+  request_id: string | null;
+}

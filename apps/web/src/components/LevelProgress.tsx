@@ -29,7 +29,7 @@ export function LevelProgress({ xp }: LevelProgressProps) {
         aria-label={`Progresso do nível: ${progress}%`}
       >
         <div
-          className="h-full rounded-pill bg-primary-bright transition-all duration-500"
+          className="bg-gradient-hero h-full rounded-pill transition-all duration-500"
           style={{ width: `${progress}%` }}
         />
       </div>

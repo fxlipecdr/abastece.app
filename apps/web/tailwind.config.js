@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-// Tailwind mapeado para as CSS custom properties do design system, garantindo
-// uma fonte única de verdade para cores e suporte automático a dark mode.
+// Tailwind mapeado para as CSS custom properties do design system v2.
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   darkMode: ['class', '[data-theme="dark"]'],
@@ -11,6 +10,7 @@ export default {
           DEFAULT: 'var(--color-primary)',
           light: 'var(--color-primary-light)',
           bright: 'var(--color-primary-bright)',
+          deep: 'var(--color-primary-deep)',
         },
         accent: {
           DEFAULT: 'var(--color-accent)',
@@ -20,6 +20,7 @@ export default {
         surface: {
           DEFAULT: 'var(--color-surface)',
           card: 'var(--color-surface-card)',
+          alt: 'var(--color-surface-alt)',
         },
         text: {
           primary: 'var(--color-text-primary)',
@@ -37,15 +38,26 @@ export default {
         sm: 'var(--radius-sm)',
         md: 'var(--radius-md)',
         lg: 'var(--radius-lg)',
+        xl: 'var(--radius-xl)',
         pill: 'var(--radius-pill)',
       },
       boxShadow: {
+        xs: 'var(--shadow-xs)',
         card: 'var(--shadow-card)',
+        soft: 'var(--shadow-soft)',
         float: 'var(--shadow-float)',
+        sheet: 'var(--shadow-sheet)',
+        'glow-primary': 'var(--glow-primary)',
+      },
+      backgroundImage: {
+        'gradient-brand': 'var(--gradient-brand)',
+        'gradient-hero': 'var(--gradient-hero)',
+        'gradient-accent': 'var(--gradient-accent)',
       },
       animation: {
         'xp-pop': 'xp-pop 0.5s ease-out',
-        'fade-slide-up': 'fade-slide-up 0.3s ease-out',
+        'fade-slide-up': 'fade-slide-up 0.35s ease-out both',
+        'float-bob': 'float-bob 4s ease-in-out infinite',
       },
     },
   },

@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { LevelProgress } from '../components/LevelProgress';
 import { BadgeGrid } from '../components/BadgeGrid';
 import { Litro } from '../components/Litro';
+import { ChevronLeftIcon } from '../components/icons';
 import { useAuthStore } from '../stores/auth';
 import { useBadges } from '../hooks/useBadges';
 import { useFavorites } from '../hooks/useFavorites';
@@ -38,16 +39,16 @@ export function ProfilePage() {
 
   return (
     <div className="min-h-dvh bg-surface pb-10">
-      <header className="bg-primary px-4 pb-6 pt-4 text-white">
-        <button onClick={() => navigate('/map')} className="mb-3 text-sm text-white/80">
-          ← Mapa
+      <header className="bg-gradient-hero px-4 pb-7 pt-4 text-white">
+        <button onClick={() => navigate('/map')} className="mb-3 flex items-center gap-1 text-sm font-medium text-white/85">
+          <ChevronLeftIcon size={20} /> Mapa
         </button>
         <div className="flex items-center gap-4">
           {profile.avatar_url ? (
             <img
               src={profile.avatar_url}
               alt=""
-              className="h-16 w-16 rounded-pill object-cover"
+              className="h-16 w-16 rounded-pill object-cover ring-2 ring-white/30"
             />
           ) : (
             <div className="flex h-16 w-16 items-center justify-center rounded-pill bg-white/15">
@@ -55,7 +56,7 @@ export function ProfilePage() {
             </div>
           )}
           <div>
-            <h1 className="font-display text-xl font-extrabold">
+            <h1 className="font-display text-xl font-extrabold tracking-tight">
               {profile.display_name || profile.username}
             </h1>
             <p className="text-white/80">@{profile.username}</p>

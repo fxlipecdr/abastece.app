@@ -19,6 +19,7 @@ import { supabase } from '../../services/supabase';
 import { PriceTag } from '../../components/PriceTag';
 import { PriceHistoryChart, type PricePoint } from '../../components/PriceHistoryChart';
 import { OfflineBanner } from '../../components/OfflineBanner';
+import { ChevronLeftIcon, NavigationIcon, StarIcon } from '../../components/icons';
 import { useFavorites } from '../../hooks/useFavorites';
 import { useAuthStore } from '../../stores/auth';
 
@@ -113,27 +114,27 @@ export function StationDetailPage() {
     <div className="min-h-dvh bg-surface pb-8">
       <OfflineBanner />
 
-      <header className="bg-primary px-4 pb-6 pt-4 text-white">
-        <button onClick={() => navigate(-1)} className="mb-3 text-sm text-white/80" aria-label="Voltar">
-          ← Voltar
+      <header className="bg-gradient-hero px-4 pb-7 pt-4 text-white">
+        <button onClick={() => navigate(-1)} className="mb-3 flex items-center gap-1 text-sm font-medium text-white/85" aria-label="Voltar">
+          <ChevronLeftIcon size={20} /> Voltar
         </button>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
-            <h1 className="font-display text-2xl font-extrabold">{station.name}</h1>
-            {station.is_verified && <span aria-label="Posto verificado">✅</span>}
+            <h1 className="font-display text-2xl font-extrabold tracking-tight">{station.name}</h1>
+            {station.is_verified && <span aria-label="Posto verificado" title="Verificado">✓</span>}
           </div>
           <button
             onClick={toggleFavorite}
             aria-pressed={isFavorite}
             aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-            className="text-2xl"
+            className="flex h-10 w-10 items-center justify-center rounded-pill bg-white/15 text-white"
             disabled={add.isPending || remove.isPending}
           >
-            {isFavorite ? '★' : '☆'}
+            <StarIcon size={20} filled={isFavorite} />
           </button>
         </div>
-        <p className="text-white/85">
-          {station.brand ? `${station.brand} • ` : ''}
+        <p className="mt-1 text-[15px] text-white/85">
+          {station.brand ? `${station.brand} · ` : ''}
           {station.address}, {station.city}/{station.state}
         </p>
         {add.isError && (
@@ -145,9 +146,9 @@ export function StationDetailPage() {
           href={navUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-2 rounded-pill bg-accent px-4 py-2 text-sm font-bold text-text-primary"
+          className="mt-4 inline-flex items-center gap-2 rounded-pill bg-white px-4 py-2.5 text-sm font-bold text-primary shadow-soft"
         >
-          🧭 Navegar até o posto
+          <NavigationIcon size={16} /> Navegar até o posto
         </a>
       </header>
 

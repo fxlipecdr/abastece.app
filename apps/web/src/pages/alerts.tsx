@@ -101,7 +101,7 @@ export function AlertsPage() {
       <h1 className="mb-6 font-display text-2xl font-extrabold">Alertas de preço</h1>
 
       {error && (
-        <p className="mb-4 rounded-md bg-danger/10 p-3 text-sm text-danger" role="alert">
+        <p className="mb-4 rounded-md tint-danger p-3 text-sm text-danger" role="alert">
           {error}
         </p>
       )}
@@ -190,7 +190,7 @@ export function AlertsPage() {
           </ul>
         )}
         {!profile?.is_premium && activeCount >= FREE_ALERT_LIMIT && (
-          <p className="mt-3 rounded-md bg-accent/20 p-3 text-sm text-text-primary">
+          <p className="mt-3 rounded-md tint-accent p-3 text-sm text-text-primary">
             🔓 Quer mais alertas? O Abastece Premium libera alertas ilimitados.
           </p>
         )}

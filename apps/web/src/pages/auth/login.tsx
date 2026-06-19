@@ -54,7 +54,7 @@ export function LoginPage() {
         </div>
 
         {error && (
-          <p className="mb-4 rounded-md bg-danger/10 p-3 text-sm text-danger" role="alert">
+          <p className="mb-4 rounded-md tint-danger p-3 text-sm text-danger" role="alert">
             {error}
           </p>
         )}

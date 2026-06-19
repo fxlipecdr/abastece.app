@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'Abastece',
         short_name: 'Abastece',
         description: 'O preço certo, na hora certa, perto de você.',
-        theme_color: '#1B5E20',
-        background_color: '#F9FBF7',
+        theme_color: '#0E8C43',
+        background_color: '#F4FBF6',
         display: 'standalone',
         start_url: '/',
         icons: [
